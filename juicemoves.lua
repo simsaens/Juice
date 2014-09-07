@@ -10,6 +10,10 @@ function juice.shakemove:init(intensity, duration, falloff)
     self.falloff = falloff
     self.time = 0
     self.didFinish = nil
+    
+    -- Code added by JakAttak --
+    self.stopMoveAction = function(dur, callback) tween(dur, self, { intensity = 0, duration = 0 }, tween.easing.linear, callback or function() end) end
+    -- end of added code -- 
 end
 
 function juice.shakemove:update(dt)
