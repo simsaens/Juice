@@ -50,7 +50,7 @@ function setup()
             for k,v in pairs(c) do        
                 print(k,v)
             end
-        end)
+    end)
 end
 
 function objChanged(val)
@@ -92,3 +92,9 @@ function draw()
     r:draw()
 end
 
+function touched(t)
+    -- Code added by JakAttak
+    if t.state == BEGAN then
+        r:stopMoves(0.5)
+    end
+end
