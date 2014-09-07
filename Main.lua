@@ -93,7 +93,6 @@ function draw()
 end
 
 function touched(t)
-    -- Code added by JakAttak
     if t.state == BEGAN then
         r:stopMoves(0.5)
     end

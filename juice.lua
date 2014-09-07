@@ -9,23 +9,21 @@ juice.move = class()
 
 juice.automatic = false
 
-function juice.move:init(p, a, s, h)
+function juice.move:init(p, a, s)
     self.pos = p or vec2(0,0)
     self.angle = a or 0
     self.scale = s or vec2(1,1)
 
     
     -- Internal
-    self.tweens = {}    -- Code added by JatAttak
+    self.tweens = {}
     self.key = -1
     self.object = nil
 end
 
--- Code added by JakAttak --
 function juice.move:addTween(t)
     table.insert(self.tweens, t)
 end
--- end of added code -- 
 
 function juice.move:draw()
     -- Optional and generally unused    

@@ -140,7 +140,7 @@ function juice.object:copyInto(obj)
 end
 
 -------------------------------------------
--- Halt all current moves -- Code added by JakAttak
+-- Halt all current moves
 -------------------------------------------
 
 function juice.object:haltMoves(dur)
@@ -360,7 +360,7 @@ function juice.object:setupTransform()
     local p = self.pos
     local a = self.angle
     local s = self.scale
-    local h = self.highlightAmount  -- Code added by JakAttak
+    local h = self.highlightAmount
     
     for k,v in pairs(self.juiceMoves) do
         p = p + v.pos

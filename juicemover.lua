@@ -7,7 +7,6 @@ function juice.mover:init()
     self.darkenAmount = 0
 end
 
--- Code added by JakAttak --
 function juice.mover:stopMoves(dur, new)
     local time = dur or 0.15
     self:haltMoves(time)
@@ -28,8 +27,6 @@ function juice.mover:stopMoves(dur, new)
         end
     end
 end
-
--- Also added: (m:addTween) for all moving animation tweens --
 
 function juice.mover:spin(rotations, duration, easing, callback)    
     rotations = rotations or 3
