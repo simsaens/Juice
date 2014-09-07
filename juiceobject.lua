@@ -140,6 +140,28 @@ function juice.object:copyInto(obj)
 end
 
 -------------------------------------------
+-- Halt all current moves -- Code added by JakAttak
+-------------------------------------------
+
+function juice.object:haltMoves(dur)
+    for k,v in pairs(self.juiceMoves) do
+        for i, t in ipairs(v.tweens) do
+            tween.stop(t)
+        end
+        
+        local etCallback = function()
+            self.juiceMoves[k] = nil
+        end
+        
+        if v.stopMoveAction then
+            v.stopMoveAction(dur, etCallback)
+        else
+            tween(dur, v, { pos = vec2(0,0), scale = vec2(1, 1), angle = 0 }, tween.easing.linear, etCallback)
+        end
+    end
+end
+
+-------------------------------------------
 -- Start a move with a specific transform
 -------------------------------------------
 
@@ -338,6 +360,7 @@ function juice.object:setupTransform()
     local p = self.pos
     local a = self.angle
     local s = self.scale
+    local h = self.highlightAmount  -- Code added by JakAttak
     
     for k,v in pairs(self.juiceMoves) do
         p = p + v.pos
@@ -489,5 +512,3 @@ function juice.object:contains(p)
     
     return false
 end
-
-
