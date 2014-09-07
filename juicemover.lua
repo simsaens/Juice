@@ -2,10 +2,34 @@ juice.mover = class(juice.object)
 
 function juice.mover:init()
     juice.object.init(self)
-    
+      
     self.highlightAmount = 0
     self.darkenAmount = 0
 end
+
+-- Code added by JakAttak --
+function juice.mover:stopMoves(dur, new)
+    local time = dur or 0.15
+    self:haltMoves(time)
+    
+    if self.flashing then
+        self.flashing.callback = function() tween(self.flashing.time, self, { highlightAmount = 0 }) end
+    end
+    
+    if new then
+        if new.pos then
+            self:moveTo(new.pos, time)
+        end
+        if new.angle then
+            self:rotateTo(new.angle, time)
+        end
+        if new.scale then
+            self:scaleTo(new.scale, time)
+        end
+    end
+end
+
+-- Also added: (m:addTween) for all moving animation tweens --
 
 function juice.mover:spin(rotations, duration, easing, callback)    
     rotations = rotations or 3
@@ -32,31 +56,31 @@ function juice.mover:bounce(height, hold, call1, call2)
     local squash = vec2(m.scale.x * 1.5, m.scale.y * 0.75)
     local moveDown = savedPos.y - self:size().y/2 * (1 - squash.y)
     
-    tween(0.15, m, {scale = squash}, tween.easing.quadInOut)
-    tween(0.15, m, {pos = vec2(0, moveDown)}, tween.easing.quadInOut, 
+    m:addTween( tween(0.15, m, {scale = squash}, tween.easing.quadInOut) )
+    m:addTween( tween(0.15, m, {pos = vec2(0, moveDown)}, tween.easing.quadInOut, 
         function() 
             local moveUp = savedPos.y + height * 0.9
             local unsquash = vec2(savedScale.x * 0.85, savedScale.y * 1.25)
             
-            tween(0.15, m, {scale = unsquash}, tween.easing.quadInOut)
-            tween(0.2, m, {pos = vec2(0, moveUp)}, tween.easing.quadOut,
+            m:addTween( tween(0.15, m, {scale = unsquash}, tween.easing.quadInOut) )
+            m:addTween( tween(0.2, m, {pos = vec2(0, moveUp)}, tween.easing.quadOut,
                 function()
                     -- Reached top of jump
                     if call1 then call1(self) end
                     
                     local holdHeight = savedPos.y + height
-                    tween(hold, m, {pos = vec2(0, holdHeight)}, tween.easing.linear,
+                    m:addTween( tween(hold, m, {pos = vec2(0, holdHeight)}, tween.easing.linear,
                      function()
-                        tween(0.15, m, {scale = savedScale}, tween.easing.quadInOut)
-                        tween(0.15, m, {pos = savedPos}, tween.easing.quadIn,
+                        m:addTween( tween(0.15, m, {scale = savedScale}, tween.easing.quadInOut) )
+                        m:addTween( tween(0.15, m, {pos = savedPos}, tween.easing.quadIn,
                             function()
                                 self:finishMove(mk)
                                 if call2 then call2(self) end
-                            end )
-                     end)
-                end )
+                            end ) )
+                     end) )
+                end ) )
             
-        end )
+        end ) )
         
     return mk,m
 end
@@ -77,11 +101,11 @@ function juice.mover:pulse(amount, repeats, hold, call1, call2)
     call1 = call1 or function() end
     call2 = call2 or call1
     
-    tween(0.15, m, {scale=amount}, tween.easing.quadIn,
+    m:addTween( tween(0.15, m, {scale=amount}, tween.easing.quadIn,
         function() 
             call1(self)
-            tween.delay(hold, function()
-                tween(0.15, m, {scale=s}, tween.easing.quadOut,
+            m:addTween( tween.delay(hold, function()
+                m:addTween( tween(0.15, m, {scale=s}, tween.easing.quadOut,
                     function()
                         call2(self)
                         self:finishMove(mk)
@@ -89,9 +113,9 @@ function juice.mover:pulse(amount, repeats, hold, call1, call2)
                             self:pulse(amount - vec2(1,1), repeats - 1, 
                                        hold, call1, call2)
                         end
-                    end)
-            end)
-        end)
+                    end) )
+            end) )
+        end) )
         
     return mk,m
 end
@@ -115,23 +139,23 @@ function juice.mover:squash(amount, hold, duration, call1, call2)
     local diff = (sz.y - (sz.y * squash.y))/2
     local moveDown = savedPos.y - diff
     
-    tween(d, m, {pos = vec2(0,moveDown)}, tween.easing.quadOut)
-    tween(d, m, {scale = squash}, tween.easing.quadOut,
+    m:addTween( tween(d, m, {pos = vec2(0,moveDown)}, tween.easing.quadOut) )
+    m:addTween( tween(d, m, {scale = squash}, tween.easing.quadOut,
       function()
         if call1 then call1(self) end
         local diff = (sz.y - (sz.y * sy))/2
         local moveDown = savedPos.y - diff
-        tween(hold, m, {pos = vec2(0,moveDown)}, tween.easing.quadOut)
-        tween(hold, m, {scale = vec2(sx,sy)}, tween.easing.quadOut,
-          function()
-            tween(d, m, {pos = savedPos}, tween.easing.backOut)
-            tween(d, m, {scale = savedScale}, tween.easing.backOut,
+        m:addTween( tween(hold, m, {pos = vec2(0,moveDown)}, tween.easing.quadOut) )
+        m:addTween( tween(hold, m, {scale = vec2(sx,sy)}, tween.easing.quadOut,
+          function() 
+            m:addTween( tween(d, m, {pos = savedPos}, tween.easing.backOut) )
+            m:addTween( tween(d, m, {scale = savedScale}, tween.easing.backOut,
               function()
                 self:finishMove(mk)
                 if call2 then call2(self) end 
-              end )
-          end)
-      end)
+              end ) )
+          end) )
+      end) )
     
     return mk,m
 end
@@ -177,11 +201,11 @@ function juice.mover:rotateTo(a, duration, easing, callback)
     
     local dest = a - self.angle
     
-    tween(duration, m, {angle=dest}, easing, 
+    m:addTween( tween(duration, m, {angle=dest}, easing, 
       function()
         self:finishMove(mk)
         if callback then callback(self) end 
-      end)
+      end) )
     
     return mk,m
 end
@@ -198,11 +222,11 @@ function juice.mover:moveTo(p, duration, easing, callback)
     
     local dest = p - self.pos
     
-    tween(duration, m, {pos=dest}, easing,
+    m:addTween( tween(duration, m, {pos=dest}, easing,
         function()
             self:finishMove(mk)
             if callback then callback(self) end
-        end)
+        end) )
         
     return mk,m
 end
@@ -224,11 +248,11 @@ function juice.mover:scaleTo(s, duration, easing, callback)
     local as = self.scale
     local dest = vec2(s.x/as.x, s.y/as.y)
     
-    tween(duration, m, {scale=dest}, easing,
+    m:addTween( tween(duration, m, {scale=dest}, easing,
         function()
             self:finishMove(mk)
             if callback then callback(self) end
-        end )
+        end ) )
         
     return mk,m
 end
@@ -245,20 +269,22 @@ function juice.mover:flash(hold, repeats, call1, call2)
     hold = hold or 0
     repeats = repeats or 1
     
+    -- Added code to store current flashing tween (so it can be stopped later) --
     local unflash = function()
-            tween(0.15, self, {highlightAmount=0}, tween.easing.linear,
+            self.flashing = tween(0.15, self, { highlightAmount = 0 }, tween.easing.linear,
                 function() 
                     if call2 then call2(self) end
+                    self:finishMove(mk)
                     if repeats > 1 or repeats < 0 then
                         self:flash(hold, repeats - 1, call1, call2)
                     end
                 end)
         end
     
-    tween(0.15, self, {highlightAmount=1}, tween.easing.linear,
+    self.flashing = tween(0.15, self, { highlightAmount = 1 }, tween.easing.linear,
         function() 
             if call1 then call1(self) end
-            tween.delay(hold, unflash)
+            self.flashing = tween.delay(hold, unflash)
         end)
 end
 
@@ -291,4 +317,3 @@ function juice.mover:copyInto(obj)
     
     juice.object.copyInto(self, obj)
 end
-
